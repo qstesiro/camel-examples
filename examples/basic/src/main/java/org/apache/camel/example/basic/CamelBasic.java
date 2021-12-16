@@ -32,12 +32,12 @@ public final class CamelBasic {
             // add routes which can be inlined as anonymous inner class
             // (to keep all code in a single java file for this basic example)
             camel.addRoutes(new RouteBuilder() {
-                @Override
-                public void configure() {
-                    from("timer:foo")
+                    @Override
+                    public void configure() {
+                        from("timer:foo")
                             .log("Hello Camel");
-                }
-            });
+                    }
+                });
 
             // start is not blocking
             camel.start();
