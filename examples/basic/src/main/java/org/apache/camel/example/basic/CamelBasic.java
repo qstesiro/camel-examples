@@ -43,7 +43,7 @@ public final class CamelBasic {
             camel.start();
 
             // so run for 10 seconds
-            Thread.sleep(10_000);
+            Thread.sleep(10_000_000);
 
             // and then stop nicely
             camel.stop();
