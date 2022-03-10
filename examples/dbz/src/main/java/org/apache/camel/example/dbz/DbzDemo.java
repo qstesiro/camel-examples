@@ -23,6 +23,9 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.component.debezium.DebeziumConstants;
+import org.apache.camel.model.dataformat.JsonLibrary;
+import org.apache.camel.Message;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +39,7 @@ docker run \
        -e MYSQL_PASSWORD=mysqluser \
        --rm -d \
        debezium/example-mysql:1.7
-mysql -h127.0.0.1 -P3306 -udebezium -pdbz -D inventory
+mysql -h127.0.0.1 -P3306 -umysqluser -pmysqluser -D inventory
 */
 
 /**
@@ -44,12 +47,13 @@ mysql -h127.0.0.1 -P3306 -udebezium -pdbz -D inventory
  */
 public final class DbzDemo {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DbzDemo.class);
+    // private static final Logger LOG = LoggerFactory.getLogger(DbzDemo.class);
 
     public static void main(String[] args) throws Exception {
+        new DbzDemo().route();
+    }
 
-        LOG.debug("About to run Debezium integration...");
-
+    private void route() throws Exception {
         try (CamelContext camel = new DefaultCamelContext()) {
             camel.addRoutes(new RouteBuilder() {
                     @Override
@@ -58,21 +62,72 @@ public final class DbzDemo {
                              + "databaseServerName=dbz-demo-123456"
                              + "&databaseServerId=123456"
                              + "&databaseHostname=localhost"
+                             + "&databasePort=3306"
                              + "&databaseUser=debezium"
                              + "&databasePassword=dbz"
                              + "&databaseIncludeList=inventory"
                              + "&tableIncludeList=inventory.customers"
-                             // + "&offsetStorage=org.apache.kafka.connect.storage.MemoryOffsetBackingStore"
-                             // + "&databaseHistory=org.apache.kafka.connect.storage.MemoryOffsetBackingStore")
-                             + "&offsetStorageFileName=/home/qstesiro/github.com/qstesiro/camel/camel-examples/examples/dbz/offset"
-                             + "&databaseHistoryFileFilename=/home/qstesiro/github.com/qstesiro/camel/camel-examples/examples/dbz/dbhistory")
-                            // .log("Incoming message ${body} with headers ${headers}");
-                            .log("Incoming message with headers");
+                             // + localStorage())
+                             + kafkaStorage())
+                            .filter(simple("${header.CamelDebeziumIdentifier} == 'dbz-demo-123456'")).stop()
+                            .end()
+                            .process(e -> {
+                                    Message msg = e.getMessage();
+                                    if (msg != null) {
+                                        System.out.printf("----------------------------- headers \n");
+                                        printHeaders(msg.getHeaders());
+                                        System.out.printf("----------------------------- message type: %s\n", msg.getClass().toString());
+                                        Object body = msg.getBody();
+                                        if (body != null) {
+                                            System.out.printf("----------------------------- body type: %s\n", body.getClass().toString());
+                                        } else {
+                                            System.out.printf("----------------------------- body null\n");
+                                        }
+                                    }
+                                })
+                            .convertBodyTo(Map.class)
+                            // .marshal().json(JsonLibrary.Fastjson)
+                            .log("Event received from Debezium : ${body}")
+                            .log("    with this identifier ${headers.CamelDebeziumIdentifier}")
+                            .log("    with these source metadata ${headers.CamelDebeziumSourceMetadata}")
+                            .log("    the event occured upon this operation '${headers.CamelDebeziumSourceOperation}'")
+                            .log("    on this database '${headers.CamelDebeziumSourceMetadata[db]}' and this table '${headers.CamelDebeziumSourceMetadata[table]}'")
+                            .log("    with the key ${headers.CamelDebeziumKey}")
+                            .log("    the previous value is ${headers.CamelDebeziumBefore}")
+                            .log("    the ddl sql text is ${headers.CamelDebeziumDdlSQL}")
+                            .routeId("dbz-demo");
                     }
                 });
+
             camel.start();
             Thread.sleep(10_100_000);
             camel.stop();
+        }
+    }
+
+    private String localStorage() {
+        return "&offsetStorageFileName=/tmp/offset"
+            // offsetFlushIntervalMs字段存在bug,文档中默认1m但实际不生效
+            + "&offsetFlushIntervalMs=1000"
+            + "&databaseHistoryFileFilename=/tmp/dbhistory";
+    }
+
+    private String kafkaStorage() {
+        return "&databaseHistoryKafkaBootstrapServers=10.138.16.188:9092"
+            + "&databaseHistory=io.debezium.relational.history.KafkaDatabaseHistory"
+            + "&databaseHistoryKafkaTopic=dbz-demo-123456.dbhistory"
+            // + "&offsetStorage=org.apache.kafka.connect.storage.MemoryOffsetBackingStore"
+            + "&offsetStorage=org.apache.kafka.connect.storage.KafkaOffset"
+            + "&offsetStorageTopic=dbz-demo-123456.offset"
+            + "&offsetStoragePartitions=3"
+            + "&offsetStorageReplicationFactor=3"
+            + "&offsetFlushIntervalMs=1000"
+            + "&offsetCommitTimeoutMs=1000";
+    }
+
+    private void printHeaders(Map<String, Object> map) {
+        for (String key : map.keySet()) {
+            System.out.printf("%s: %s\n", key, map.get(key));
         }
     }
 }
