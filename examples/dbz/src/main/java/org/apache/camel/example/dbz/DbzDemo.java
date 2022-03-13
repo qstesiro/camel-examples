@@ -30,16 +30,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /*
-docker run \
-       --name mysql \
-       --network host \
-       -p 3306:3306 \
-       -e MYSQL_ROOT_PASSWORD=debezium \
-       -e MYSQL_USER=mysqluser \
-       -e MYSQL_PASSWORD=mysqluser \
-       --rm -d \
-       debezium/example-mysql:1.7
-mysql -h127.0.0.1 -P3306 -umysqluser -pmysqluser -D inventory
+  docker run \
+  --name mysql \
+  --network host \
+  -p 3306:3306 \
+  -e MYSQL_ROOT_PASSWORD=debezium \
+  -e MYSQL_USER=mysqluser \
+  -e MYSQL_PASSWORD=mysqluser \
+  --rm -d \
+  debezium/example-mysql:1.7
+  mysql -h127.0.0.1 -P3306 -umysqluser -pmysqluser -D inventory
 */
 
 /**
@@ -59,29 +59,31 @@ public final class DbzDemo {
                     @Override
                     public void configure() {
                         from("debezium-mysql:dbz-demo?"
+                             //
                              + "databaseServerName=dbz-demo-123456"
                              + "&databaseServerId=123456"
                              + "&databaseHostname=localhost"
                              + "&databasePort=3306"
                              + "&databaseUser=debezium"
                              + "&databasePassword=dbz"
+                             //
                              + "&databaseIncludeList=inventory"
                              + "&tableIncludeList=inventory.customers"
-                             // + localStorage())
-                             + kafkaStorage())
+                             + localStorage())
+                            // + kafkaStorage())
                             .filter(simple("${header.CamelDebeziumIdentifier} == 'dbz-demo-123456'")).stop()
                             .end()
                             .process(e -> {
                                     Message msg = e.getMessage();
                                     if (msg != null) {
-                                        System.out.printf("----------------------------- headers \n");
+                                        System.out.printf("--- headers \n");
                                         printHeaders(msg.getHeaders());
-                                        System.out.printf("----------------------------- message type: %s\n", msg.getClass().toString());
+                                        System.out.printf("--- message type: %s\n", msg.getClass().toString());
                                         Object body = msg.getBody();
                                         if (body != null) {
-                                            System.out.printf("----------------------------- body type: %s\n", body.getClass().toString());
+                                            System.out.printf("--- body type: %s\n", body.getClass().toString());
                                         } else {
-                                            System.out.printf("----------------------------- body null\n");
+                                            System.out.printf("--- body null\n");
                                         }
                                     }
                                 })
@@ -113,16 +115,23 @@ public final class DbzDemo {
     }
 
     private String kafkaStorage() {
-        return "&databaseHistoryKafkaBootstrapServers=10.138.16.188:9092"
-            + "&databaseHistory=io.debezium.relational.history.KafkaDatabaseHistory"
-            + "&databaseHistoryKafkaTopic=dbz-demo-123456.dbhistory"
-            // + "&offsetStorage=org.apache.kafka.connect.storage.MemoryOffsetBackingStore"
-            + "&offsetStorage=org.apache.kafka.connect.storage.KafkaOffset"
+        return "&additionalProperties.bootstrap.servers=127.0.0.1:9092"
+            // "&additionalProperties.bootstrap.servers=localhost:9092"
+            // + "&configuration.bootstrap.servers=10.138.16.188:9092"
+            + "&offsetStorage=org.apache.kafka.connect.storage.KafkaOffsetBackingStore"
             + "&offsetStorageTopic=dbz-demo-123456.offset"
             + "&offsetStoragePartitions=3"
             + "&offsetStorageReplicationFactor=3"
             + "&offsetFlushIntervalMs=1000"
-            + "&offsetCommitTimeoutMs=1000";
+            + "&offsetCommitTimeoutMs=1000"
+            //
+            + "&databaseHistoryKafkaBootstrapServers=127.0.0.1:9092"
+            + "&databaseHistory=io.debezium.relational.history.KafkaDatabaseHistory"
+            + "&databaseHistoryKafkaTopic=dbz-demo-123456.dbhistory";
+        // + "&offsetStorage=org.apache.kafka.connect.storage.MemoryOffsetBackingStore";
+
+        // for debug ???
+        // return "additionalProperties.bootstrap.servers=127.0.0.1:9092";
     }
 
     private void printHeaders(Map<String, Object> map) {

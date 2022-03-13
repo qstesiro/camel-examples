@@ -1,0 +1,18 @@
+use /home/qstesiro/github.com/qstesiro/camel/camel-examples/examples/dbz/src/main/java:/home/qstesiro/github.com/qstesiro/camel/components/camel-debezium/camel-debezium-common/camel-debezium-common-component/src/main/java:/home/qstesiro/github.com/qstesiro/camel/core/camel-core-model/src/main/java:/home/qstesiro/github.com/qstesiro/camel/components/camel-debezium/camel-debezium-mysql/src/main/java:/home/qstesiro/github.com/qstesiro/camel/core/camel-base-engine/src/main/java:/home/qstesiro/github.com/qstesiro/camel/core/camel-support/src/main/java
+
+# catch java.sql.SQLException
+
+# stop at org.apache.camel.example.dbz.DbzDemo:main(java.lang.String[])
+# stop at org.apache.camel.example.dbz.DbzDemo.route()
+# stop at org.apache.camel.builder.RouteBuilder.from(java.lang.String)
+# stop at org.apache.camel.support.DefaultComponent:171
+# stop at org.apache.camel.component.debezium.DebeziumComponent:58
+# stop at org.apache.camel.support.PropertyBindingSupport:174
+stop at org.apache.camel.support.PropertyBindingSupport:227
+# stop at org.apache.camel.support.PropertyBindingSupport:326
+# stop at org.apache.camel.support.PropertyBindingSupport:415
+# stop at org.apache.camel.component.debezium.DebeziumMySqlEndpoint:36
+# stop at org.apache.camel.component.debezium.DebeziumConsumer:39
+stop at org.apache.camel.component.debezium.DebeziumConsumer:70
+
+cont
