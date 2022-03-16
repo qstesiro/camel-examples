@@ -31,16 +31,28 @@ import org.slf4j.LoggerFactory;
 
 /*
   docker run \
-  --name mysql \
-  --network host \
-  -p 3306:3306 \
-  -e MYSQL_ROOT_PASSWORD=debezium \
-  -e MYSQL_USER=mysqluser \
-  -e MYSQL_PASSWORD=mysqluser \
-  --rm -d \
-  debezium/example-mysql:1.7
-  mysql -h127.0.0.1 -P3306 -umysqluser -pmysqluser -D inventory
-*/
+      --name mysql \
+      --network dbz \
+      --network-alias mysql \
+      -p 3306:3306 \
+      -e MYSQL_ROOT_PASSWORD=debezium \
+      -e MYSQL_USER=mysqluser \
+      -e MYSQL_PASSWORD=mysqluser \
+      --rm -d \
+      debezium/example-mysql:1.7
+
+   # 客户端
+   docker run \
+       --net host \
+       -it --rm \
+       debezium/example-mysql:1.7 \
+       mysql -h127.0.0.1 \
+       -P3306 \
+       -umysqluser \
+       -pmysqluser \
+       -Dinventory \
+       --prompt 'mysqluser> '
+ */
 
 /**
  * A simple example to consume data from Debezium and send it to Kinesis
@@ -53,6 +65,40 @@ public final class DbzDemo {
         new DbzDemo().route();
     }
 
+    // 本地测试
+    // private final static String HOSTNAME = "localhost";
+    // private final static String PORT = "3306";
+    // private final static String USER = "debezium";
+    // private final static String PASSWORD = "dbz";
+    // private final static String DATABASE = "inventory";
+    // private final static String TABLE = "inventory.customers";
+    // 部分账号因权限问题无法获取所有表的锁,所以需要限定快照哪些表
+    // private final static String SNAPSHOT_TABLE = "inventory.customers";
+
+    // 测试环境
+    private final static String HOSTNAME = "10.138.228.243";
+    private final static String PORT = "3306";
+    private final static String USER = "debezium";
+    private final static String PASSWORD = "vWrqedsPyIxll1A1yL";
+    private final static String DATABASE = "console";
+    private final static String TABLE = "console.app_record";
+    // 部分账号因权限问题无法获取所有表的锁,所以需要限定快照哪些表
+    private final static String SNAPSHOT_TABLE = "console.app_record";
+
+    //
+    // private final static String HOSTNAME = "rm-m5e872l40u6jans22.mysql.rds.aliyuncs.com";
+    // private final static String PORT = "3306";
+    // private final static String USER = "hwork_em_hx";
+    // private final static String PASSWORD = "CuVZ@R$4w^";
+    // private final static String DATABASE = "hwork_qwrgqk";
+    // private final static String TABLE = "hwork_qwrgqk.tm_brand";
+    // 部分账号因权限问题无法获取所有表的锁,所以需要限定快照哪些表
+    // private final static String SNAPSHOT_TABLE = "hwork_qwrgqk.tm_brand";
+
+    /*
+      rm -f /tmp/dbz-demo-123456.offset
+      rm -f /tmp/dbz-demo-123456.dbhistory
+    */
     private void route() throws Exception {
         try (CamelContext camel = new DefaultCamelContext()) {
             camel.addRoutes(new RouteBuilder() {
@@ -62,13 +108,14 @@ public final class DbzDemo {
                              //
                              + "databaseServerName=dbz-demo-123456"
                              + "&databaseServerId=123456"
-                             + "&databaseHostname=localhost"
-                             + "&databasePort=3306"
-                             + "&databaseUser=debezium"
-                             + "&databasePassword=dbz"
+                             + "&databaseHostname=" + HOSTNAME
+                             + "&databasePort=" + PORT
+                             + "&databaseUser=" + USER
+                             + "&databasePassword=" + PASSWORD
                              //
-                             + "&databaseIncludeList=inventory"
-                             + "&tableIncludeList=inventory.customers"
+                             + "&databaseIncludeList=" + DATABASE
+                             + "&tableIncludeList=" + TABLE
+                             + "&snapshotIncludeCollectionList=" + SNAPSHOT_TABLE
                              + localStorage())
                             // + kafkaStorage())
                             .filter(simple("${header.CamelDebeziumIdentifier} == 'dbz-demo-123456'")).stop()
@@ -85,6 +132,8 @@ public final class DbzDemo {
                                         } else {
                                             System.out.printf("--- body null\n");
                                         }
+                                    } else {
+                                        System.out.printf("message null\n");
                                     }
                                 })
                             .convertBodyTo(Map.class)
@@ -108,10 +157,11 @@ public final class DbzDemo {
     }
 
     private String localStorage() {
-        return "&offsetStorageFileName=/tmp/offset"
+        return "&offsetStorageFileName=/tmp/dbz-demo-123456.offset"
             // offsetFlushIntervalMs字段存在bug,文档中默认1m但实际不生效
             + "&offsetFlushIntervalMs=1000"
-            + "&databaseHistoryFileFilename=/tmp/dbhistory";
+            + "&offsetCommitTimeoutMs=1000"
+            + "&databaseHistoryFileFilename=/tmp/dbz-demo-123456.dbhistory";
     }
 
     private String kafkaStorage() {

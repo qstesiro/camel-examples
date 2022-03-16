@@ -13,6 +13,6 @@ use /home/qstesiro/github.com/qstesiro/camel/camel-examples/examples/dbz/src/mai
 # stop at org.apache.camel.support.PropertyBindingSupport:415
 # stop at org.apache.camel.component.debezium.DebeziumMySqlEndpoint:36
 # stop at org.apache.camel.component.debezium.DebeziumConsumer:39
-stop at org.apache.camel.component.debezium.DebeziumConsumer:70
+# stop at org.apache.camel.component.debezium.DebeziumConsumer:70
 
 cont
