@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.camel.example.dbz;
 
 import java.util.HashMap;
@@ -22,12 +23,10 @@ import java.util.Map;
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultCamelContext;
+import org.apache.camel.support.DefaultRegistry;
 import org.apache.camel.component.debezium.DebeziumConstants;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.apache.camel.Message;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /*
   docker run \
@@ -58,12 +57,6 @@ import org.slf4j.LoggerFactory;
  * A simple example to consume data from Debezium and send it to Kinesis
  */
 public final class DbzDemo {
-
-    // private static final Logger LOG = LoggerFactory.getLogger(DbzDemo.class);
-
-    public static void main(String[] args) throws Exception {
-        new DbzDemo().route();
-    }
 
     // 本地测试
     // private final static String HOSTNAME = "localhost";
@@ -99,7 +92,7 @@ public final class DbzDemo {
       rm -f /tmp/dbz-demo-123456.offset
       rm -f /tmp/dbz-demo-123456.dbhistory
     */
-    private void route() throws Exception {
+    public void route() throws Exception {
         try (CamelContext camel = new DefaultCamelContext()) {
             camel.addRoutes(new RouteBuilder() {
                     @Override
@@ -118,8 +111,10 @@ public final class DbzDemo {
                              + "&snapshotIncludeCollectionList=" + SNAPSHOT_TABLE
                              + localStorage())
                             // + kafkaStorage())
+                            .routeId("dbz-demo")
                             .filter(simple("${header.CamelDebeziumIdentifier} == 'dbz-demo-123456'")).stop()
                             .end()
+                            .convertBodyTo(Map.class)
                             .process(e -> {
                                     Message msg = e.getMessage();
                                     if (msg != null) {
@@ -136,7 +131,7 @@ public final class DbzDemo {
                                         System.out.printf("message null\n");
                                     }
                                 })
-                            .convertBodyTo(Map.class)
+                            // .convertBodyTo(Map.class)
                             // .marshal().json(JsonLibrary.Fastjson)
                             .log("Event received from Debezium : ${body}")
                             .log("    with this identifier ${headers.CamelDebeziumIdentifier}")
@@ -145,8 +140,7 @@ public final class DbzDemo {
                             .log("    on this database '${headers.CamelDebeziumSourceMetadata[db]}' and this table '${headers.CamelDebeziumSourceMetadata[table]}'")
                             .log("    with the key ${headers.CamelDebeziumKey}")
                             .log("    the previous value is ${headers.CamelDebeziumBefore}")
-                            .log("    the ddl sql text is ${headers.CamelDebeziumDdlSQL}")
-                            .routeId("dbz-demo");
+                            .log("    the ddl sql text is ${headers.CamelDebeziumDdlSQL}");
                     }
                 });
 
