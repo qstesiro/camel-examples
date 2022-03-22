@@ -23,7 +23,7 @@ use /home/qstesiro/github.com/qstesiro/camel/camel-examples/examples/dbz/src/mai
 
 # 嵌套内部类设置断点需要类路径中包含内部类名
 # 嵌套内部匿名类设置断点需要类路径中包含内部匿名的类名($x)
-stop at org.apache.camel.example.dbz.DbzDemo$1:74
+# stop at org.apache.camel.example.dbz.DbzDemo$1:74
 # stop at org.apache.camel.example.dbz.DbzDemo:93
 
 cont

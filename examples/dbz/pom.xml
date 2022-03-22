@@ -77,6 +77,13 @@ limitations under the License.
       <!-- <version>6.0.6</version> -->
     </dependency>
 
+    <dependency>
+      <groupId>org.apache.camel</groupId>
+      <artifactId>camel-kafka</artifactId>
+      <!-- <version>x.x.x</version> -->
+      <!-- use the same version as your Camel core version -->
+    </dependency>
+
     <!-- jdbc demo -->
     <dependency>
       <groupId>org.apache.camel</groupId>

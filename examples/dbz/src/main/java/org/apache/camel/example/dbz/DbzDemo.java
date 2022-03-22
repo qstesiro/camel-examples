@@ -221,9 +221,9 @@ public final class DbzDemo {
     // private final static String SNAPSHOT_TABLE = "hwork_qwrgqk.tm_brand";
 
     private String uri() {
-        return "debezium-mysql:dbz-demo?"
+        return "debezium-mysql:dbz-demo"
             //
-            + "databaseServerName=dbz-demo-123456"
+            + "?databaseServerName=dbz-demo-123456"
             + "&databaseServerId=123456"
             + "&databaseHostname=" + FROM_HOSTNAME
             + "&databasePort=" + FROM_PORT
