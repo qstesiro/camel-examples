@@ -3,7 +3,7 @@
     # 正常运行
     alias mvn='mvn compile camel:run'
     # 调试运行
-    alias mvn='set -m; mvnDebug compile camel:run& pid=$!; jdb -connect com.sun.jdi.SocketAttach:hostname=localhost,port=1025; kill -SIGTERM -- -$pid; set +m'
+    alias mvn='rm -f /tmp/dbz-demo-123456.offset; rm -f /tmp/dbz-demo-123456.dbhistory; set -m; mvnDebug compile camel:run& pid=$!; jdb -connect com.sun.jdi.SocketAttach:hostname=localhost,port=1025; kill -SIGTERM -- -$pid; set +m'
 }
 
 # kafka

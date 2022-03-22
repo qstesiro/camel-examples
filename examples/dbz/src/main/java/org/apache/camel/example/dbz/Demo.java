@@ -20,8 +20,10 @@ package org.apache.camel.example.dbz;
 public final class Demo {
 
     public static void main(String[] args) throws Exception {
-        // new DbzDemo().route();
+        new DbzDemo().route();
         // new JdbcDemo().route();
-        new BeanDemo().route();
+        // new BeanDemo().route();
     }
 }
+
+// kamel run Demo.java -t mount.enabled=true -t mount.volumes=dbz:/tmp/ -w

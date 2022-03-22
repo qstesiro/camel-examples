@@ -56,7 +56,7 @@ public final class BeanDemo {
                             .bean(new Bean(), "enhance")
                             .bean("bean", "enhance")
                             .bean(new Bean(), "print")
-                            .bean("bean", "print")
+                            .bean("bean", "print");
                     }
                 });
             camel.start();
