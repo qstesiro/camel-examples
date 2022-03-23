@@ -3,7 +3,7 @@ version
 
 use /home/qstesiro/github.com/qstesiro/camel/camel-examples/examples/dbz/src/main/java:/home/qstesiro/github.com/qstesiro/camel/components/camel-debezium/camel-debezium-common/camel-debezium-common-component/src/main/java:/home/qstesiro/github.com/qstesiro/camel/core/camel-core-model/src/main/java:/home/qstesiro/github.com/qstesiro/camel/components/camel-debezium/camel-debezium-mysql/src/main/java:/home/qstesiro/github.com/qstesiro/camel/core/camel-base-engine/src/main/java:/home/qstesiro/github.com/qstesiro/camel/core/camel-support/src/main/java
 
-# catch uncaugh java.lang.Exception
+# catch java.lang.Exception
 
 # stop in org.apache.camel.example.dbz.DbzDemo.getRegistry()
 # stop in org.apache.camel.example.dbz.DbzDemo.getDataSource()
@@ -23,6 +23,8 @@ use /home/qstesiro/github.com/qstesiro/camel/camel-examples/examples/dbz/src/mai
 
 # 嵌套内部类设置断点需要类路径中包含内部类名
 # 嵌套内部匿名类设置断点需要类路径中包含内部匿名的类名($x)
+# 嵌套类型可以通过class 外部类的全路径来查看
+# 例: class org.apache.camel.example.dbz.DbzDemo
 # stop at org.apache.camel.example.dbz.DbzDemo$1:74
 # stop at org.apache.camel.example.dbz.DbzDemo:93
 

@@ -49,37 +49,53 @@ public final class KafkaDemo {
                         from(uri())
                             .routeId("kafka-demo")
                             // .log("${body}")
-                            .process(e -> {
-                                    Message msg = e.getMessage();
-                                    if (msg != null) {
-                                        System.out.printf("--- message type: %s\n", msg.getClass().toString());
-                                        Object body = msg.getBody();
-                                        if (body != null) {
-                                            System.out.printf("--- body type: %s\n", body.getClass().toString());
-                                        } else {
-                                            System.out.printf("--- body null\n");
-                                        }
-                                    } else {
-                                        System.out.printf("message null\n");
-                                    }
-                                })
+                            // .process(e -> {
+                            //         Message msg = e.getMessage();
+                            //         if (msg != null) {
+                            //             System.out.printf("--- message type: %s\n", msg.getClass().toString());
+                            //             Object body = msg.getBody();
+                            //             if (body != null) {
+                            //                 System.out.printf("--- body type: %s\n", body.getClass().toString());
+                            //             } else {
+                            //                 System.out.printf("--- body null\n");
+                            //             }
+                            //         } else {
+                            //             System.out.printf("message null\n");
+                            //         }
+                            //     })
                             .unmarshal().json()
                             // .convertBodyTo(LinkedHashMap.class)
-                            .process(e -> {
-                                    Message msg = e.getMessage();
-                                    if (msg != null) {
-                                        System.out.printf("--- message type: %s\n", msg.getClass().toString());
-                                        Object body = msg.getBody();
-                                        if (body != null) {
-                                            System.out.printf("--- body type: %s\n", body.getClass().toString());
-                                        } else {
-                                            System.out.printf("--- body null\n");
-                                        }
-                                    } else {
-                                        System.out.printf("message null\n");
-                                    }
-                                })
-                            .log("${body[source][query]}")
+                            // .process(e -> {
+                            //         Message msg = e.getMessage();
+                            //         if (msg != null) {
+                            //             System.out.printf("--- message type: %s\n", msg.getClass().toString());
+                            //             Object body = msg.getBody();
+                            //             if (body != null) {
+                            //                 System.out.printf("--- body type: %s\n", body.getClass().toString());
+                            //             } else {
+                            //                 System.out.printf("--- body null\n");
+                            //             }
+                            //         } else {
+                            //             System.out.printf("message null\n");
+                            //         }
+                            //     })
+                            .log("${body}")
+                            .choice()
+                                // .when(simple("${body[ddl]} != null && ${body[source][table]} == 'customers'"))
+                                //     .setBody(simple(ddl()))
+                                //     .log("${body}")
+                                //     .to("jdbc:demo")
+                                .when(simple("${body[op]} == 'r'"))
+                                    .setBody(simple(select()))
+                                    .log("${body}")
+                                    .to("jdbc:demo")
+                                .when(simple("${body[op]} == 'c' || ${body[op]} == 'u' || ${body[op]} == 'd'"))
+                                    .setBody(simple(operate()))
+                                    .log("${body}")
+                                    .to("jdbc:demo")
+                                .otherwise()
+                                    .log("discard --- ${body}")
+                            // .log("${body}")
                             // .log("    on the topic ${headers[kafka.TOPIC]}")
                             // .log("    on the partition ${headers[kafka.PARTITION]}")
                             // .log("    with the offset ${headers[kafka.OFFSET]}")
@@ -95,9 +111,23 @@ public final class KafkaDemo {
     }
 
     private String uri() {
-        return "kafka:demo-43585133"
+        return "kafka:demo-43585133.inventory.customers"
             + "?brokers=localhost:9092"
             + "&autoOffsetReset=earliest";
+    }
+
+    private String ddl() {
+        return "${body[ddl]}";
+    }
+
+    private String select() {
+        return "insert into ${body[source][table]} (id, first_name, last_name, email) values (${body[after][id]}, '${body[after][first_name]}', '${body[after][last_name]}', '${body[after][email]}')";
+    }
+
+    private String operate() {
+        // c/u/d 可以解决where问题
+        // 但是可能因客户端使用orm框架(或是用户编写)带有数据库的名称(例:database.table)
+        return "${body[source][query]}";
     }
 
     // 本地环境
