@@ -121,7 +121,15 @@ public final class KafkaDemo {
     }
 
     private String select() {
-        return "insert into ${body[source][table]} (id, first_name, last_name, email) values (${body[after][id]}, '${body[after][first_name]}', '${body[after][last_name]}', '${body[after][email]}')";
+        return "insert into "
+            + " ${body[source][table]} "
+            + " (id, first_name, last_name, email) "
+            + " values ("
+                + " ${body[after][id]}, "
+                + " '${body[after][first_name]}', "
+                + " '${body[after][last_name]}', "
+                + " '${body[after][email]}'"
+            + " ) ";
     }
 
     private String operate() {
