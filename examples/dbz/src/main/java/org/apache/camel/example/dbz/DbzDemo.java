@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.builder.SimpleBuilder;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.support.DefaultRegistry;
 import org.apache.camel.component.debezium.DebeziumConstants;
@@ -32,7 +33,7 @@ import org.apache.commons.dbcp2.*;
 import javax.sql.DataSource;
 
 /*
-  docker run \
+  docker run       \
       --name mysql \
       --network dbz \
       --network-alias mysql \
@@ -90,28 +91,59 @@ public final class DbzDemo {
                                 })
                             // .filter(simple("${header.CamelDebeziumIdentifier} == 'dbz-demo-123456'")).stop()
                             .convertBodyTo(Map.class)
-                            .log("Event received from Debezium : ${body}")
-                            .choice()
-                                .when(simple("${header.CamelDebeziumDdlSQL} != null && ${header.CamelDebeziumSourceMetadata[table]} == 'app_record'"))
-                                    .setBody(simple(ddl()))
-                            // .log("${body}")
-                                    .to("jdbc:demo")
-                                .when(simple("${header.CamelDebeziumOperation} == 'c'"))
-                                    .setBody(simple(insert()))
-                            // .log("${body}")
-                                    .to("jdbc:demo")
-                                .when(simple("${header.CamelDebeziumOperation} == 'u'"))
-                                    .setBody(simple(update()))
-                            // .log("${body}")
-                                    .to("jdbc:demo")
-                                .when(simple("${header.CamelDebeziumOperation} == 'd'"))
-                                    .setBody(simple(delete()))
-                            // .log("${body}")
-                                    .to("jdbc:demo")
-                                .when(simple("${header.CamelDebeziumOperation} == 'r'"))
-                                    .setBody(simple(select()))
-                            // .log("${body}")
-                                    .to("jdbc:demo");
+                            // .log("Event received from Debezium : ${body}")
+
+                            // simple
+                            // .choice()
+                            //     .when(simple("${header.CamelDebeziumDdlSQL} != null && ${header.CamelDebeziumSourceMetadata[table]} == 'app_record'"))
+                            //         .setBody(simple(ddl()))
+                            //         .log("${body}")
+                            //         // .to("jdbc:demo")
+                            //     .when(simple("${header.CamelDebeziumOperation} == 'c'"))
+                            //         .setBody(simple(insert()))
+                            //         .log("${body}")
+                            //         // .to("jdbc:demo")
+                            //     .when(simple("${header.CamelDebeziumOperation} == 'u'"))
+                            //         .setBody(simple(update()))
+                            //         .log("${body}")
+                            //         // .to("jdbc:demo")
+                            //     .when(simple("${header.CamelDebeziumOperation} == 'd'"))
+                            //         .setBody(simple(delete()))
+                            //         .log("${body}")
+                            //         // .to("jdbc:demo")
+                            //     .when(simple("${header.CamelDebeziumOperation} == 'r'"))
+                            //         .setBody(simple(select()))
+                            //         .log("${body}")
+                            //         // .to("jdbc:demo");
+
+                            // groovy
+                            // .setBody().groovy("abc")
+                            .setHeader("key").groovy("request.body")
+                            .log("${header.key}")
+                            .setBody().groovy("def v = 'abc'; request.headers.CamelDebeziumDdlSQL + v")
+                            .log("${body}")
+                            // .choice()
+                            //     .when(simple("${header.CamelDebeziumDdlSQL} != null && ${header.CamelDebeziumSourceMetadata[table]} == 'app_record'"))
+                            //         .setBody(simple(ddl()))
+                            //         .log("${body}")
+                            //         // .to("jdbc:demo")
+                            //     .when(simple("${header.CamelDebeziumOperation} == 'c'"))
+                            //         .setBody(simple(insert()))
+                            //         .log("${body}")
+                            //         // .to("jdbc:demo")
+                            //     .when(simple("${header.CamelDebeziumOperation} == 'u'"))
+                            //         .setBody(simple(update()))
+                            //         .log("${body}")
+                            //         // .to("jdbc:demo")
+                            //     .when(simple("${header.CamelDebeziumOperation} == 'd'"))
+                            //         .setBody(simple(delete()))
+                            //         .log("${body}")
+                            //         // .to("jdbc:demo")
+                            //     .when(simple("${header.CamelDebeziumOperation} == 'r'"))
+                            //         .setBody(simple(select()))
+                            //         .log("${body}")
+                            //         // .to("jdbc:demo");
+
                             // .marshal().json(JsonLibrary.Fastjson)
                             // .log("    with this identifier ${headers.CamelDebeziumIdentifier}")
                             // .log("    with these source metadata ${headers.CamelDebeziumSourceMetadata}")
@@ -123,6 +155,7 @@ public final class DbzDemo {
                             // .filter(simple("${header.CamelDebeziumSourceOperation}"))
                             // .setBody(simple("insert into app_record(hash, cluster, namespace, service, pod, created_at, updated_at) values('${body[\"hash\"]}', '${body[\"cluster\"]}', '${body[\"namespace\"]}', '${body[\"servcie\"]}', '${body[\"pod\"]}', '${body[\"created_at\"]}', '${body[\"updated_at\"]}')"))
                             // .to("jdbc:demo");
+                            ;
                     }
                 });
 
@@ -191,24 +224,24 @@ public final class DbzDemo {
     }
 
     // 本地测试
-    // private final static String FROM_HOSTNAME = "localhost";
-    // private final static String FROM_PORT = "3306";
-    // private final static String FROM_USER = "debezium";
-    // private final static String FROM_PASSWORD = "dbz";
-    // private final static String DATABASE = "inventory";
-    // private final static String TABLE = "inventory.customers";
-    // // 部分账号因权限问题无法获取所有表的锁,所以需要限定快照哪些表
-    // private final static String SNAPSHOT_TABLE = "inventory.customers";
-
-    // // 测试环境
-    private final static String FROM_HOSTNAME = "10.138.228.243";
+    private final static String FROM_HOSTNAME = "localhost";
     private final static String FROM_PORT = "3306";
     private final static String FROM_USER = "debezium";
-    private final static String FROM_PASSWORD = "vWrqedsPyIxll1A1yL";
-    private final static String DATABASE = "console";
-    private final static String TABLE = "console.app_record";
+    private final static String FROM_PASSWORD = "dbz";
+    private final static String DATABASE = "inventory";
+    private final static String TABLE = "inventory.customers";
     // 部分账号因权限问题无法获取所有表的锁,所以需要限定快照哪些表
-    private final static String SNAPSHOT_TABLE = "console.app_record";
+    private final static String SNAPSHOT_TABLE = "inventory.customers";
+
+    // // 测试环境
+    // private final static String FROM_HOSTNAME = "10.138.228.243";
+    // private final static String FROM_PORT = "3306";
+    // private final static String FROM_USER = "debezium";
+    // private final static String FROM_PASSWORD = "vWrqedsPyIxll1A1yL";
+    // private final static String DATABASE = "console";
+    // private final static String TABLE = "console.app_record";
+    // // 部分账号因权限问题无法获取所有表的锁,所以需要限定快照哪些表
+    // private final static String SNAPSHOT_TABLE = "console.app_record";
 
     //
     // private final static String FROM_HOSTNAME = "rm-m5e872l40u6jans22.mysql.rds.aliyuncs.com";
