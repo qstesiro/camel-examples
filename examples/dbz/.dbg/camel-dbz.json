@@ -1,4 +1,29 @@
 {
+  "type": "source",
+  "tasks": [],
+  "config": {
+    "name": "hwork-mkt-443826",
+    "tombstones.on.delete": "false",
+    "topic.creation.default.retention.ms": "259200000",
+    "topic.creation.default.replication.factor": "2",
+    "topic.creation.default.partitions": "3",
+    "snapshot.include.collection.list": "hwork_qwrgqk.tm_mkt,hwork_qwrgqk.ta_apply_privilege_mkt",
+    "table.include.list": "hwork_qwrgqk.tm_mkt,hwork_qwrgqk.ta_apply_privilege_mkt",
+    "database.history.kafka.topic": "hwork-mkt-443826.history",
+    "database.history.kafka.bootstrap.servers": "dbz-cluster-kafka-plain-bootstrap:9092",
+    "database.server.name": "hwork-mkt-443826",
+    "database.server.id": "443826",
+    "database.password": "CuVZ@R$4w^",
+    "database.user": "hwork_em_hx",
+    "database.port": "3306",
+    "qdatabase.hostname": "rm-m5e872l40u6jans22.mysql.rds.aliyuncs.com",
+    "tasks.max": "1",
+    "connector.class": "io.debezium.connector.mysql.MySqlConnector"
+  },
+  "name": "hwork-mkt-443826"
+}
+
+{
   "tableChanges": [],
   "ddl": "SET character_set_server=utf8mb4, collation_server=utf8mb4_0900_ai_ci",
   "schemaName": null,

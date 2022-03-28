@@ -33,28 +33,24 @@ import org.apache.commons.dbcp2.*;
 import javax.sql.DataSource;
 
 /*
-  docker run       \
-      --name mysql \
-      --network dbz \
-      --network-alias mysql \
-      -p 3306:3306 \
-      -e MYSQL_ROOT_PASSWORD=debezium \
-      -e MYSQL_USER=mysqluser \
-      -e MYSQL_PASSWORD=mysqluser \
-      --rm -d \
-      debezium/example-mysql:1.7
+  docker run \
+         --name mysql \
+         --network dbz \
+         --network-alias mysql \
+         -p 3306:3306 \
+         -e MYSQL_ROOT_PASSWORD=debezium \
+         -e MYSQL_USER=mysqluser \
+         -e MYSQL_PASSWORD=mysqluser \
+         --rm -d \
+         debezium/example-mysql:1.7
 
    # 客户端
-   docker run \
-       --net host \
-       -it --rm \
-       debezium/example-mysql:1.7 \
-       mysql -h127.0.0.1 \
-       -P3306 \
-       -umysqluser \
-       -pmysqluser \
-       -Dinventory \
-       --prompt 'mysqluser> '
+   mysql -h127.0.0.1 \
+         -P3306 \
+         -umysqluser \
+         -pmysqluser \
+         -Dinventory \
+        --prompt 'mysqluser> '
  */
 
 /**
@@ -246,7 +242,7 @@ class GroovyRoute extends SimpleRoute {
                     Message msg = e.getMessage();
                     if (msg != null) {
                         // System.out.printf("--- headers \n");
-                        printHeaders(msg.getHeaders());
+                        // printHeaders(msg.getHeaders());
                         // System.out.printf("--- message type: %s\n", msg.getClass().toString());
                         // Object body = msg.getBody();
                         // if (body != null) {
@@ -261,29 +257,28 @@ class GroovyRoute extends SimpleRoute {
             // .filter(simple("${header.CamelDebeziumIdentifier} == 'dbz-demo-123456'")).stop()
             .convertBodyTo(Map.class)
             // .log("Event received from Debezium : ${body}")
-
-            // simple
+            // groovy
             .choice()
-                .when(simple("${header.CamelDebeziumDdlSQL} != null && ${header.CamelDebeziumSourceMetadata[table]} == 'app_record'"))
-                    .setBody(simple(ddl()))
+                .when().groovy(ddlOp())
+                    .setBody().groovy(ddl())
                     .log("${body}")
                     // .to("jdbc:demo")
-                .when(simple("${header.CamelDebeziumOperation} == 'c'"))
-                    .setBody(simple(insert()))
+                .when().groovy(insertOp())
+                    .setBody().groovy(insert())
+                    .log("${body}")
+                //     // .to("jdbc:demo")
+                // .when().groovy(updateOp())
+                //     .setBody(simple(update()))
+                //     .log("${body}")
+                //      // .to("jdbc:demo")
+                // .when().groovy(deleteOp())
+                //     .setBody(simple(delete()))
+                //     .log("${body}")
+                //     // .to("jdbc:demo")
+                .when().groovy(selectOp())
+                    .setBody().groovy(select())
                     .log("${body}")
                     // .to("jdbc:demo")
-                .when(simple("${header.CamelDebeziumOperation} == 'u'"))
-                    .setBody(simple(update()))
-                    .log("${body}")
-                    // .to("jdbc:demo")
-                .when(simple("${header.CamelDebeziumOperation} == 'd'"))
-                    .setBody(simple(delete()))
-                    .log("${body}")
-                    // .to("jdbc:demo")
-                .when(simple("${header.CamelDebeziumOperation} == 'r'"))
-                    .setBody(simple(select()))
-                    .log("${body}")
-                    // .to("jdbc:demo");
 
             // groovy
             // .setBody().groovy("abc")
@@ -291,37 +286,43 @@ class GroovyRoute extends SimpleRoute {
             // .log("${header.key}")
             // .setBody().groovy("def v = 'abc'; request.headers.CamelDebeziumDdlSQL + v")
             // .log("${body}")
-
-            // .marshal().json(JsonLibrary.Fastjson)
-            // .log("    with this identifier ${headers.CamelDebeziumIdentifier}")
-            // .log("    with these source metadata ${headers.CamelDebeziumSourceMetadata}")
-            // .log("    the event occured upon this operation '${headers.CamelDebeziumSourceOperation}'")
-            // .log("    on this database '${headers.CamelDebeziumSourceMetadata[db]}' and this table '${headers.CamelDebeziumSourceMetadata[table]}'")
-            // .log("    with the key ${headers.CamelDebeziumKey}")
-            // .log("    the previous value is ${headers.CamelDebeziumBefore}")
-            // .log("    the ddl sql text is ${headers.CamelDebeziumDdlSQL}");
-            // .filter(simple("${header.CamelDebeziumSourceOperation}"))
-            // .setBody(simple("insert into app_record(hash, cluster, namespace, service, pod, created_at, updated_at) values('${body[\"hash\"]}', '${body[\"cluster\"]}', '${body[\"namespace\"]}', '${body[\"servcie\"]}', '${body[\"pod\"]}', '${body[\"created_at\"]}', '${body[\"updated_at\"]}')"))
-            // .to("jdbc:demo");
             ;
     }
 
+    private String ddlOp() {
+        return "def h = request.headers;"
+            + "h['CamelDebeziumDdlSQL'] != null"
+            + " && "
+            + "h['CamelDebeziumSourceMetadata']['table'] == 'app_record'";
+    }
+
     private String ddl()  {
-        return "${header.CamelDebeziumDdlSQL}";
+        return "request.headers['CamelDebeziumDdlSQL']";
+    }
+
+    private String insertOp() {
+        return "request.headers['CamelDebeziumOperation'] == 'c'";
     }
 
     private String insert() {
-        return "insert into ${header.CamelDebeziumSourceMetadata[table]} "
+        return "def h = request.headers; def b = request.body;"
+            + "\"\"\""
+            + "insert into ${h['CamelDebeziumSourceMetadata']['table']} "
             + " (hash, cluster, namespace, service, pod, created_at, updated_at) "
             + " values ("
-            + " ${body[hash]}, "
-            + " '${body[cluster]}', "
-            + " '${body[namespace]}', "
-            + " '${body[servcie]}', "
-            + " '${body[pod]}', "
-            + " from_unixtime(${body[created_at]}/1000), "
-            + " from_unixtime(${body[updated_at]}/1000) "
-            + " )";
+                + " ${b['hash']}, "
+                + " '${b['cluster']}', "
+                + " '${b['namespace']}', "
+                + " '${b['servcie']}', "
+                + " '${b['pod']}', "
+                + " from_unixtime(${b['created_at']}/1000), "
+                + " from_unixtime(${b['updated_at']}/1000) "
+            + " )"
+            + "\"\"\"";
+    }
+
+    private String updateOp() {
+        return "request.headers.CamelDebeziumOperation == 'u'";
     }
 
     private String update() {
@@ -346,6 +347,10 @@ class GroovyRoute extends SimpleRoute {
             + " updated_at = from_unixtime(${header.CamelDebeziumBefore[updated_at]}/1000) ";
     }
 
+    private String deleteOp() {
+        return "request.headers.CamelDebeziumOperation == 'd'";
+    }
+
     private String delete() {
         // 组件未返回dml所以对于有条件操作无法完全还原
         // 当前使用以下方式(可能存在潜在的隐患)
@@ -358,6 +363,10 @@ class GroovyRoute extends SimpleRoute {
             + " pod        = '${header.CamelDebeziumBefore[pod]}' and "
             + " created_at = from_unixtime(${header.CamelDebeziumBefore[created_at]}/1000) and "
             + " updated_at = from_unixtime(${header.CamelDebeziumBefore[updated_at]}/1000) ";
+    }
+
+    private String selectOp() {
+        return "request.headers.CamelDebeziumOperation == 'r'";
     }
 
     private String select() {
