@@ -5,10 +5,11 @@ use /home/qstesiro/github.com/qstesiro/camel/camel-examples/examples/dbz/src/mai
 
 # catch java.lang.Exception
 
+# stop at org.apache.camel.example.dbz.Demo.main(java.lang.String[])
+
 # stop in org.apache.camel.example.dbz.DbzDemo.getRegistry()
 # stop in org.apache.camel.example.dbz.DbzDemo.getDataSource()
 
-# stop at org.apache.camel.example.dbz.DbzDemo:main(java.lang.String[])
 # stop at org.apache.camel.example.dbz.DbzDemo.route()
 # stop at org.apache.camel.builder.RouteBuilder.from(java.lang.String)
 # stop at org.apache.camel.support.DefaultComponent:171

@@ -43,99 +43,12 @@ public final class KafkaDemo {
 
     public void route() throws Exception {
         try (CamelContext camel = new DefaultCamelContext(getRegistry())) {
-            camel.addRoutes(new RouteBuilder() {
-                    @Override
-                    public void configure() {
-                        from(uri())
-                            .routeId("kafka-demo")
-                            // .log("${body}")
-                            // .process(e -> {
-                            //         Message msg = e.getMessage();
-                            //         if (msg != null) {
-                            //             System.out.printf("--- message type: %s\n", msg.getClass().toString());
-                            //             Object body = msg.getBody();
-                            //             if (body != null) {
-                            //                 System.out.printf("--- body type: %s\n", body.getClass().toString());
-                            //             } else {
-                            //                 System.out.printf("--- body null\n");
-                            //             }
-                            //         } else {
-                            //             System.out.printf("message null\n");
-                            //         }
-                            //     })
-                            .unmarshal().json()
-                            // .convertBodyTo(LinkedHashMap.class)
-                            // .process(e -> {
-                            //         Message msg = e.getMessage();
-                            //         if (msg != null) {
-                            //             System.out.printf("--- message type: %s\n", msg.getClass().toString());
-                            //             Object body = msg.getBody();
-                            //             if (body != null) {
-                            //                 System.out.printf("--- body type: %s\n", body.getClass().toString());
-                            //             } else {
-                            //                 System.out.printf("--- body null\n");
-                            //             }
-                            //         } else {
-                            //             System.out.printf("message null\n");
-                            //         }
-                            //     })
-                            .log("${body}")
-                            .choice()
-                                // .when(simple("${body[ddl]} != null && ${body[source][table]} == 'customers'"))
-                                //     .setBody(simple(ddl()))
-                                //     .log("${body}")
-                                //     .to("jdbc:demo")
-                                .when(simple("${body[op]} == 'r'"))
-                                    .setBody(simple(select()))
-                                    .log("${body}")
-                                    .to("jdbc:demo")
-                                .when(simple("${body[op]} == 'c' || ${body[op]} == 'u' || ${body[op]} == 'd'"))
-                                    .setBody(simple(operate()))
-                                    .log("${body}")
-                                    .to("jdbc:demo")
-                                .otherwise()
-                                    .log("discard --- ${body}")
-                            // .log("${body}")
-                            // .log("    on the topic ${headers[kafka.TOPIC]}")
-                            // .log("    on the partition ${headers[kafka.PARTITION]}")
-                            // .log("    with the offset ${headers[kafka.OFFSET]}")
-                            // .log("    with the key ${headers[kafka.KEY]}")
-                            ;
-                    }
-                });
-
+            // camel.addRoutes(new SimpleRoute());
+            camel.addRoutes(new GroovyRoute());
             camel.start();
             Thread.sleep(10_100_000);
             camel.stop();
         }
-    }
-
-    private String uri() {
-        return "kafka:demo-43585133.inventory.customers"
-            + "?brokers=localhost:9092"
-            + "&autoOffsetReset=earliest";
-    }
-
-    private String ddl() {
-        return "${body[ddl]}";
-    }
-
-    private String select() {
-        return "insert into "
-            + " ${body[source][table]} "
-            + " (id, first_name, last_name, email) "
-            + " values ("
-                + " ${body[after][id]}, "
-                + " '${body[after][first_name]}', "
-                + " '${body[after][last_name]}', "
-                + " '${body[after][email]}'"
-            + " ) ";
-    }
-
-    private String operate() {
-        // c/u/d 可以解决where问题
-        // 但是可能因客户端使用orm框架(或是用户编写)带有数据库的名称(例:database.table)
-        return "${body[source][query]}";
     }
 
     // 本地环境
@@ -161,5 +74,259 @@ public final class KafkaDemo {
         ds.setPassword(TO_PASSWORD);
         ds.setUrl(URL);
         return ds;
+    }
+
+    class SimpleRoute extends RouteBuilder {
+
+        @Override
+        public void configure() {
+            from(uri())
+                .routeId("kafka-demo")
+                // .log("${body}")
+                // .process(e -> {
+                //         Message msg = e.getMessage();
+                //         if (msg != null) {
+                //             System.out.printf("--- message type: %s\n", msg.getClass().toString());
+                //             Object body = msg.getBody();
+                //             if (body != null) {
+                //                 System.out.printf("--- body type: %s\n", body.getClass().toString());
+                //             } else {
+                //                 System.out.printf("--- body null\n");
+                //             }
+                //         } else {
+                //             System.out.printf("message null\n");
+                //         }
+                //     })
+                .unmarshal().json()
+                // .convertBodyTo(LinkedHashMap.class)
+                // .process(e -> {
+                //         Message msg = e.getMessage();
+                //         if (msg != null) {
+                //             System.out.printf("--- message type: %s\n", msg.getClass().toString());
+                //             Object body = msg.getBody();
+                //             if (body != null) {
+                //                 System.out.printf("--- body type: %s\n", body.getClass().toString());
+                //             } else {
+                //                 System.out.printf("--- body null\n");
+                //             }
+                //         } else {
+                //             System.out.printf("message null\n");
+                //         }
+                //     })
+                .log("${body}")
+                .choice()
+                    .when(simple(ddlOp()))
+                        .setBody(simple(ddl()))
+                        .log("${body}")
+                        .to("jdbc:demo")
+                    .when(simple(selectOp()))
+                        .setBody(simple(select()))
+                        .log("${body}")
+                        .to("jdbc:demo")
+                    .when(simple(dmlOp()))
+                        .setBody(simple(dml()))
+                        .log("${body}")
+                        .to("jdbc:demo")
+                    .otherwise()
+                        .log("discard --- ${body}")
+                // .log("${body}")
+                // .log("    on the topic ${headers[kafka.TOPIC]}")
+                // .log("    on the partition ${headers[kafka.PARTITION]}")
+                // .log("    with the offset ${headers[kafka.OFFSET]}")
+                // .log("    with the key ${headers[kafka.KEY]}")
+                ;
+        }
+
+        protected String uri() {
+            return "kafka:demo-43585133.inventory.customers"
+                + "?brokers=localhost:9092"
+                + "&autoOffsetReset=earliest";
+        }
+
+        protected String ddlOp() {
+            return "${body[ddl]} != null && ${body[source][table]} == 'customers'";
+        }
+
+        protected String ddl() {
+            return "${body[ddl]}";
+        }
+
+        protected String selectOp() {
+            return "${body[op]} == 'r'";
+        }
+
+        protected String select() {
+            return "insert into "
+                + " ${body[source][table]} "
+                + " (id, first_name, last_name, email) "
+                + " values (${body[after][id]}, "
+                        + " '${body[after][first_name]}', "
+                        + " '${body[after][last_name]}', "
+                        + " '${body[after][email]}') ";
+        }
+
+        protected String dmlOp() {
+            return "${body[op]} == 'c' || ${body[op]} == 'u' || ${body[op]} == 'd'";
+        }
+
+        protected String dml() {
+            // 获取sql需要设置变量
+            // set binlog_rows_query_log_events=on;
+            // c/u/d 可以解决where问题
+            // 但是可能因客户端使用orm框架(或是用户编写)带有数据库的名称(例:database.table)
+            return "${body[source][query]}";
+        }
+    }
+
+    class GroovyRoute extends SimpleRoute {
+
+        @Override
+        public void configure() {
+            from(uri())
+                .routeId("kafka-demo")
+                // .log("${body}")
+                // .process(e -> {
+                //         Message msg = e.getMessage();
+                //         if (msg != null) {
+                //             System.out.printf("--- message type: %s\n", msg.getClass().toString());
+                //             Object body = msg.getBody();
+                //             if (body != null) {
+                //                 System.out.printf("--- body type: %s\n", body.getClass().toString());
+                //             } else {
+                //                 System.out.printf("--- body null\n");
+                //             }
+                //         } else {
+                //             System.out.printf("message null\n");
+                //         }
+                //     })
+                .unmarshal().json()
+                // .convertBodyTo(LinkedHashMap.class)
+                // .process(e -> {
+                //         Message msg = e.getMessage();
+                //         if (msg != null) {
+                //             System.out.printf("--- message type: %s\n", msg.getClass().toString());
+                //             Object body = msg.getBody();
+                //             if (body != null) {
+                //                 System.out.printf("--- body type: %s\n", body.getClass().toString());
+                //             } else {
+                //                 System.out.printf("--- body null\n");
+                //             }
+                //         } else {
+                //             System.out.printf("message null\n");
+                //         }
+                //     })
+                // .log("${body}")
+                .choice()
+                    .when().groovy(ddlOp())
+                        .setBody().groovy(ddl())
+                        .log("${body}")
+                        .to("jdbc:demo")
+                    .when().groovy(selectOp())
+                        .setBody().groovy(select())
+                        .log("${body}")
+                        .to("jdbc:demo")
+                    .when().groovy(dmlOp())
+                        .setBody().groovy(dml())
+                        .log("${body}")
+                        .to("jdbc:demo")
+                    .otherwise()
+                        .log("discard --- ${body}")
+                // .log("${body}")
+                // .log("    on the topic ${headers[kafka.TOPIC]}")
+                // .log("    on the partition ${headers[kafka.PARTITION]}")
+                // .log("    with the offset ${headers[kafka.OFFSET]}")
+                // .log("    with the key ${headers[kafka.KEY]}")
+                ;
+        }
+
+        @Override
+        protected String ddlOp() {
+            return "def b = request.body;"
+                + "b.ddl != null && b.source.table == 'customers'";
+        }
+
+        @Override
+        protected String ddl() {
+            return "def v = request.body.ddl;"
+                + "def s = '`inventory`.';"
+                + "if (v.contains(s)) {v = v.replace(s, ''); return v};"
+                + "s = 'inventory.';"
+                + "if (v.contains(s)) {v = v.replace(s, ''); return v};"
+                + "v";
+        }
+
+        @Override
+        protected String selectOp() {
+            return "request.body.op == 'r'";
+        }
+
+        @Override
+        protected String select() {
+            return "def b = request.body;"
+                + "\"\"\""
+                + "insert into "
+                + " ${b.source.table} "
+                + " (id, first_name, last_name, email) "
+                + " values (${b.after.id}, "
+                        + " '${b.after.first_name}', "
+                        + " '${b.after.last_name}', "
+                        + " '${b.after.email}') "
+                + "\"\"\"";
+        }
+
+        @Override
+        protected String dmlOp() {
+            return "def b = request.body;"
+                + "b.op == 'c' || b.op == 'u' || b.op == 'd'";
+        }
+
+        @Override
+        protected String dml() {
+            // 获取sql需要设置变量
+            // set binlog_rows_query_log_events=on;
+            // c/u/d 可以解决where问题
+            // 但是可能因客户端使用orm框架(或是用户编写)带有数据库的名称(例:database.table)
+            return "def b = request.body;"
+                + "if (b.source.query != null) { "
+                    + "def q = b.source.query;"
+                    + "def s = '`inventory`.';"
+                    + "if (q.contains(s)) {q = q.replace(s, ''); return q};"
+                    + "s = 'inventory.';"
+                    + "if (q.contains(s)) {q = q.replace(s, ''); return q};"
+                    + "q"
+                + "} else if (b.op == 'c') {"
+                    + "return \"\"\""
+                            + "insert into ${b.source.table} "
+                            + " (id, first_name, last_name, email) "
+                            + " values (${b.after.id}, "
+                                    + " '${b.after.first_name}', "
+                                    + " '${b.after.last_name}', "
+                                    + " '${b.after.email}') "
+                            + "\"\"\""
+                + "} else if (b.op == 'u') {"
+                    + "return \"\"\""
+                            + "update ${b.source.table} "
+                            + " set "
+                                + " id         = ${b.after.id}, "
+                                + " first_name = '${b.after.first_name}', "
+                                + " last_name  = '${b.after.last_name}', "
+                                + " email      = '${b.after.email}'"
+                            + " where "
+                                + " id         = ${b.before.id} and "
+                                + " first_name = '${b.before.first_name}' and "
+                                + " last_name  = '${b.before.last_name}' and "
+                                + " email      = '${b.before.email}'"
+                            + "\"\"\""
+                + "} else if (b.op == 'd') {"
+                    + "return \"\"\""
+                            + "delete from ${b.source.table} "
+                            + " where "
+                                + " id         = ${b.before.id} and "
+                                + " first_name = '${b.before.first_name}' and "
+                                + " last_name  = '${b.before.last_name}' and "
+                                + " email      = '${b.before.email}'"
+                            + "\"\"\""
+                + "}";
+        }
     }
 }
