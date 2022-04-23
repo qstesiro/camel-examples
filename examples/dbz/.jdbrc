@@ -1,7 +1,7 @@
 # 增加打印版本保证cont可以正常执行(如果不增加程序启动后会停止必须手工执行cont/run才能继续执行,具体原因不明)
 version
 
-use /home/qstesiro/github.com/qstesiro/camel/camel-examples/examples/dbz/src/main/java:/home/qstesiro/github.com/qstesiro/camel/components/camel-debezium/camel-debezium-common/camel-debezium-common-component/src/main/java:/home/qstesiro/github.com/qstesiro/camel/core/camel-core-model/src/main/java:/home/qstesiro/github.com/qstesiro/camel/components/camel-debezium/camel-debezium-mysql/src/main/java:/home/qstesiro/github.com/qstesiro/camel/core/camel-base-engine/src/main/java:/home/qstesiro/github.com/qstesiro/camel/core/camel-support/src/main/java
+use /home/qstesiro/github.com/qstesiro/camel/camel-examples/examples/dbz/src/main/java:/home/qstesiro/github.com/qstesiro/camel/components/camel-debezium/camel-debezium-common/camel-debezium-common-component/src/main/java:/home/qstesiro/github.com/qstesiro/camel/core/camel-core-model/src/main/java:/home/qstesiro/github.com/qstesiro/camel/components/camel-debezium/camel-debezium-mysql/src/main/java:/home/qstesiro/github.com/qstesiro/camel/core/camel-base-engine/src/main/java:/home/qstesiro/github.com/qstesiro/camel/core/camel-support/src/main/java:/home/qstesiro/github.com/qstesiro/camel/components/camel-elasticsearch-rest/src/main/java
 
 # catch java.lang.Exception
 
@@ -21,6 +21,12 @@ use /home/qstesiro/github.com/qstesiro/camel/camel-examples/examples/dbz/src/mai
 # stop at org.apache.camel.component.debezium.DebeziumMySqlEndpoint:36
 # stop at org.apache.camel.component.debezium.DebeziumConsumer:39
 # stop at org.apache.camel.component.debezium.DebeziumConsumer:70
+
+# stop at org.apache.camel.component.elasticsearch.ElasticsearchComponent:72
+# stop at org.apache.camel.component.elasticsearch.ElasticsearchProducer:121
+# stop at org.apache.camel.component.elasticsearch.ElasticsearchProducer:124
+# stop at org.apache.camel.component.elasticsearch.ElasticsearchProducer:136
+stop at org.apache.camel.component.elasticsearch.ElasticsearchProducer:243
 
 # 嵌套内部类设置断点需要类路径中包含内部类名
 # 嵌套内部匿名类设置断点需要类路径中包含内部匿名的类名($x)
