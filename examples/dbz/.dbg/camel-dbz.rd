@@ -8,7 +8,7 @@
 
     # 编译组件
     cd ./components
-    mvn clean install -pl camel-elasticsearch-rest -am -Dmaven.test.skip=true
+    mvn install -pl camel-elasticsearch-rest -am -Dmaven.test.skip=true
     cd ../
 }
 

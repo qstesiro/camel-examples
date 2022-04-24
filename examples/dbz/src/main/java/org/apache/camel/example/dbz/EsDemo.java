@@ -76,8 +76,7 @@ public final class EsDemo {
 
     class SimpleRoute extends RouteBuilder {
 
-        public final static String ES_QUERY = "{\"query\": {\"bool\": {\"must\": {\"term\": {\"idsite\": \"btbrrs\"}},\"filter\": {\"range\": {\"visitTimestamp\": {\"gte\": \"now-1d/d\",\"lt\": \"now/d\"}}}}},\"size\": 1}";
-        // \"aggs\": {\"idvisitor\": {\"cardinality\": {\"field\": \"idvisitor\"}}}
+        public final static String ES_QUERY = "{\"query\": {\"bool\": {\"must\": {\"term\": {\"idsite\": \"btbrrs\"}},\"filter\": {\"range\": {\"visitTimestamp\": {\"gte\": \"now-1d/d\",\"lt\": \"now/d\"}}}}},\"size\": 0, \"aggs\": {\"idvisitor\": {\"cardinality\": {\"field\": \"idvisitor\"}}}}";
 
         @Override
         public void configure() {
@@ -92,7 +91,7 @@ public final class EsDemo {
                 .routeId("es-demo")
                 .setBody(constant(ES_QUERY))
                 .to("es-rest:cluster?indexName=matomo_visit_log_202204&operation=Search")
-                // .unmarshal().json()
+                .unmarshal().json()
                 .log("${body}")
                 ;
         }
@@ -100,7 +99,7 @@ public final class EsDemo {
         protected String uri() {
             return "timer:demo"
                 + "?delay=0"
-                + "&period=60000"
+                + "&period=10000"
                 + "&repeatCount=1000";
         }
     }
