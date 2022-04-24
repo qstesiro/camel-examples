@@ -41,8 +41,7 @@ public final class EsDemo {
 
     public void route() throws Exception {
         try (CamelContext camel = new DefaultCamelContext(getRegistry())) {
-            camel.addRoutes(new SimpleRoute());
-            // camel.addRoutes(new GroovyRoute());
+            camel.addRoutes(new GroovyRoute());
             camel.start();
             Thread.sleep(10_100_000);
             camel.stop();
@@ -74,9 +73,9 @@ public final class EsDemo {
         return ds;
     }
 
-    class SimpleRoute extends RouteBuilder {
+    public final static String ES_QUERY = "{\"query\": {\"bool\": {\"must\": {\"term\": {\"idsite\": \"btbrrs\"}},\"filter\": {\"range\": {\"visitTimestamp\": {\"gte\": \"now-1d/d\",\"lt\": \"now/d\"}}}}},\"size\": 0, \"aggs\": {\"idvisitor\": {\"cardinality\": {\"field\": \"idvisitor\"}}}}";
 
-        public final static String ES_QUERY = "{\"query\": {\"bool\": {\"must\": {\"term\": {\"idsite\": \"btbrrs\"}},\"filter\": {\"range\": {\"visitTimestamp\": {\"gte\": \"now-1d/d\",\"lt\": \"now/d\"}}}}},\"size\": 0, \"aggs\": {\"idvisitor\": {\"cardinality\": {\"field\": \"idvisitor\"}}}}";
+    class GroovyRoute extends RouteBuilder {
 
         @Override
         public void configure() {
@@ -91,8 +90,10 @@ public final class EsDemo {
                 .routeId("es-demo")
                 .setBody(constant(ES_QUERY))
                 .to("es-rest:cluster?indexName=matomo_visit_log_202204&operation=Search")
-                .unmarshal().json()
+                // .unmarshal().json()
                 .log("${body}")
+                // .setBody().groovy(convert())
+                // .log("${body}")
                 ;
         }
 
@@ -101,6 +102,10 @@ public final class EsDemo {
                 + "?delay=0"
                 + "&period=10000"
                 + "&repeatCount=1000";
+        }
+
+        private String convert() {
+            return "request.body.aggregations";
         }
     }
 }
