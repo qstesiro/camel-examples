@@ -107,11 +107,16 @@ public final class EsDemo {
         }
 
         private String convert() {
-            // return "request.body.took";
-            // return "request.body.hits";
-            // return "request.body.aggregations";
-            return "request.body.aggregations[\"sterms#idsite\"].buckets.each"
-                + "{e -> sprintf(\"%s\\n\", e)}";
+            return "def lst = [];"
+                + "for (e in request.body.aggregations[\"sterms#idsite\"].buckets) {"
+                +     "def map = ["
+                +          "\"key\": e.key,"
+                +          "\"pvId\": e[\"cardinality#pvId\"].value,"
+                +          "\"idvisitor\": e[\"cardinality#idvisitor\"].value"
+                +"     ];"
+                +     "lst.add(map);"
+                + "};"
+                + "return lst";
         }
     }
 }
