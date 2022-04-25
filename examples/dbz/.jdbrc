@@ -29,6 +29,7 @@ use /home/qstesiro/github.com/qstesiro/camel/camel-examples/examples/dbz/src/mai
 # stop at org.apache.camel.component.elasticsearch.ElasticsearchProducer:233
 # stop at org.apache.camel.component.elasticsearch.ElasticsearchProducer:250
 # stop at org.apache.camel.component.elasticsearch.ElasticsearchProducer:251
+# stop at org.apache.camel.component.elasticsearch.ElasticsearchProducer:267
 # stop at org.apache.camel.support.MessageSupport:72
 # stop at org.apache.camel.support.MessageSupport:87
 # stop at org.apache.camel.support.MessageSupport:96

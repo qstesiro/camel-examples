@@ -73,7 +73,9 @@ public final class EsDemo {
         return ds;
     }
 
-    public final static String ES_QUERY = "{\"query\": {\"bool\": {\"must\": {\"term\": {\"idsite\": \"btbrrs\"}},\"filter\": {\"range\": {\"visitTimestamp\": {\"gte\": \"now-1d/d\",\"lt\": \"now/d\"}}}}},\"size\": 0, \"aggs\": {\"idvisitor\": {\"cardinality\": {\"field\": \"idvisitor\"}}}}";
+    // public final static String ES_QUERY = "{\"query\": {\"bool\": {\"must\": {\"term\": {\"idsite\": \"btbrrs\"}},\"filter\": {\"range\": {\"visitTimestamp\": {\"gte\": \"now-1d/d\",\"lt\": \"now/d\"}}}}},\"size\": 0, \"aggs\": {\"idvisitor\": {\"cardinality\": {\"field\": \"idvisitor\"}}}}";
+
+    public final static String ES_QUERY = "{\"query\":{\"bool\":{\"filter\":{\"range\":{\"visitTimestamp\":{\"gte\":\"now-2d/d\",\"lt\":\"now-1d/d\"}}}}},\"size\":0,\"aggs\":{\"idsite\":{\"terms\":{\"field\":\"idsite\",\"size\":2},\"aggs\":{\"idvisitor\":{\"cardinality\":{\"field\":\"idvisitor\"}},\"pvId\":{\"cardinality\":{\"field\":\"pvId\"}}}}}}";
 
     class GroovyRoute extends RouteBuilder {
 
@@ -89,11 +91,11 @@ public final class EsDemo {
             from(uri())
                 .routeId("es-demo")
                 .setBody(constant(ES_QUERY))
-                .to("es-rest:cluster?indexName=matomo_visit_log_202204&operation=Search")
+                .to("es-rest:cluster?indexName=matomo_visit_log_*&operation=Search")
                 // .unmarshal().json()
                 .log("${body}")
-                // .setBody().groovy(convert())
-                // .log("${body}")
+                .setBody().groovy(convert())
+                .log("${body}")
                 ;
         }
 
@@ -105,7 +107,11 @@ public final class EsDemo {
         }
 
         private String convert() {
-            return "request.body.aggregations";
+            // return "request.body.took";
+            // return "request.body.hits";
+            // return "request.body.aggregations";
+            return "request.body.aggregations[\"sterms#idsite\"].buckets.each"
+                + "{e -> sprintf(\"%s\\n\", e)}";
         }
     }
 }
