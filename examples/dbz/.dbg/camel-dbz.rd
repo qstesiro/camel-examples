@@ -3,13 +3,12 @@
     # 正常运行
     alias mvn='mvn compile camel:run'
 
-    # 调试运行
-    alias mvn='rm -f /tmp/dbz-demo-123456.offset; rm -f /tmp/dbz-demo-123456.dbhistory; set -m; mvnDebug compile camel:run& pid=$!; jdb -connect com.sun.jdi.SocketAttach:hostname=localhost,port=1025; kill -SIGTERM -- -$pid; set +m'
+    # 调试运行(java-11)
+    alias mvn='set -m; mvnDebug compile camel:run& pid=$!; jdb -connect com.sun.jdi.SocketAttach:hostname=localhost,port=1025; kill -SIGTERM -- -$pid; set +m'
 
-    # 编译组件
-    cd ./components
+    # 编译组件(mvn-3.6.3)
     mvn install -pl camel-elasticsearch-rest -am -Dmaven.test.skip=true
-    cd ../
+    mvn install -pl camel-kafka -am -Dmaven.test.skip=true
 }
 
 # kafka

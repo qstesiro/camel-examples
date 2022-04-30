@@ -1,7 +1,7 @@
 # 增加打印版本保证cont可以正常执行(如果不增加程序启动后会停止必须手工执行cont/run才能继续执行,具体原因不明)
 version
 
-use /home/qstesiro/github.com/qstesiro/camel/camel-examples/examples/dbz/src/main/java:/home/qstesiro/github.com/qstesiro/camel/components/camel-debezium/camel-debezium-common/camel-debezium-common-component/src/main/java:/home/qstesiro/github.com/qstesiro/camel/core/camel-core-model/src/main/java:/home/qstesiro/github.com/qstesiro/camel/components/camel-debezium/camel-debezium-mysql/src/main/java:/home/qstesiro/github.com/qstesiro/camel/core/camel-base-engine/src/main/java:/home/qstesiro/github.com/qstesiro/camel/core/camel-support/src/main/java:/home/qstesiro/github.com/qstesiro/camel/components/camel-elasticsearch-rest/src/main/java:/home/qstesiro/github.com/qstesiro/camel/core/camel-support/src/main/java:/home/qstesiro/github.com/qstesiro/camel/core/camel-base/src/main/java
+use /home/qstesiro/github.com/qstesiro/camel/camel-examples/examples/dbz/src/main/java:/home/qstesiro/github.com/qstesiro/camel/components/camel-debezium/camel-debezium-common/camel-debezium-common-component/src/main/java:/home/qstesiro/github.com/qstesiro/camel/core/camel-core-model/src/main/java:/home/qstesiro/github.com/qstesiro/camel/components/camel-debezium/camel-debezium-mysql/src/main/java:/home/qstesiro/github.com/qstesiro/camel/core/camel-base-engine/src/main/java:/home/qstesiro/github.com/qstesiro/camel/core/camel-support/src/main/java:/home/qstesiro/github.com/qstesiro/camel/components/camel-elasticsearch-rest/src/main/java:/home/qstesiro/github.com/qstesiro/camel/components/camel-kafka/src/main/java:/home/qstesiro/github.com/qstesiro/camel/core/camel-support/src/main/java:/home/qstesiro/github.com/qstesiro/camel/core/camel-base/src/main/java
 
 # catch java.lang.Exception
 
@@ -37,6 +37,18 @@ use /home/qstesiro/github.com/qstesiro/camel/camel-examples/examples/dbz/src/mai
 # stop at org.apache.camel.impl.converter.CoreTypeConverterRegistry:476
 # stop at org.apache.camel.component.elasticsearch.converter.ElasticsearchActionRequestConverter:207
 # stop at org.apache.camel.component.elasticsearch.converter.ElasticsearchActionRequestConverter:220
+
+# stop at org.apache.camel.component.kafka.KafkaComponent:47
+# stop at org.apache.camel.component.kafka.KafkaComponent:52
+# stop at org.apache.camel.component.kafka.KafkaComponent:125
+# stop at org.apache.camel.component.kafka.KafkaComponent:151
+# stop at org.apache.camel.component.kafka.KafkaEndpoint:64
+# stop at org.apache.camel.component.kafka.KafkaEndpoint:120
+# stop at org.apache.camel.component.kafka.KafkaConsumer:93
+# stop at org.apache.camel.component.kafka.KafkaFetchRecords:82
+# stop at org.apache.camel.component.kafka.KafkaFetchRecords:161
+stop at org.apache.camel.component.kafka.KafkaFetchRecords:170
+# stop at org.apache.camel.component.kafka.DefaultKafkaClientFactory:34
 
 # 嵌套内部类设置断点需要类路径中包含内部类名
 # 嵌套内部匿名类设置断点需要类路径中包含内部匿名的类名($x)

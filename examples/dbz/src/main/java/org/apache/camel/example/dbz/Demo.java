@@ -23,8 +23,8 @@ public final class Demo {
         // new DbzDemo().route();
         // new JdbcDemo().route();
         // new BeanDemo().route();
-        // new KafkaDemo().route();
-        new EsDemo().route();
+        new KafkaDemo().route();
+        // new EsDemo().route();
     }
 }
 

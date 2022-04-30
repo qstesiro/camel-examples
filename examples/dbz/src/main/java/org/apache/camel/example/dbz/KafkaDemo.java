@@ -43,8 +43,8 @@ public final class KafkaDemo {
 
     public void route() throws Exception {
         try (CamelContext camel = new DefaultCamelContext(getRegistry())) {
-            // camel.addRoutes(new SimpleRoute());
-            camel.addRoutes(new GroovyRoute());
+            camel.addRoutes(new SimpleRoute());
+            // camel.addRoutes(new GroovyRoute());
             camel.start();
             Thread.sleep(10_100_000);
             camel.stop();
@@ -114,21 +114,21 @@ public final class KafkaDemo {
                 //         }
                 //     })
                 .log("${body}")
-                .choice()
-                    .when(simple(ddlOp()))
-                        .setBody(simple(ddl()))
-                        .log("${body}")
-                //.to("jdbc:demo")
-                    .when(simple(selectOp()))
-                        .setBody(simple(select()))
-                        .log("${body}")
-                // .to("jdbc:demo")
-                    .when(simple(dmlOp()))
-                        .setBody(simple(dml()))
-                        .log("${body}")
-                // .to("jdbc:demo")
-                    .otherwise()
-                        .log("discard --- ${body}")
+                // .choice()
+                //     .when(simple(ddlOp()))
+                //         .setBody(simple(ddl()))
+                //         .log("${body}")
+                // //.to("jdbc:demo")
+                //     .when(simple(selectOp()))
+                //         .setBody(simple(select()))
+                //         .log("${body}")
+                // // .to("jdbc:demo")
+                //     .when(simple(dmlOp()))
+                //         .setBody(simple(dml()))
+                //         .log("${body}")
+                // // .to("jdbc:demo")
+                //     .otherwise()
+                //         .log("discard --- ${body}")
                 // .log("${body}")
                 // .log("    on the topic ${headers[kafka.TOPIC]}")
                 // .log("    on the partition ${headers[kafka.PARTITION]}")
@@ -138,9 +138,18 @@ public final class KafkaDemo {
         }
 
         protected String uri() {
-            return "kafka:demo-43585133.inventory.customers"
-                + "?brokers=localhost:9092"
-                + "&autoOffsetReset=earliest";
+            // return "kafka:demo-43585133.inventory.customers"
+            //     + "?brokers=localhost:9092"
+            //     + "&groupId=2021-1231-1035-orgs-prod"
+            //     + "&autoOffsetReset=earliest";
+            return "kafka:mysql-prod.console.org"
+                + "?brokers=10.138.16.188:9092"
+                + "&groupId=hmm-demo"
+                + "&autoOffsetReset=earliest"
+                + "&sessionTimeoutMs=100000"
+                + "&heartbeatIntervalMs=30000"
+                + "&pollTimeoutMs=1000"
+                + "&maxPollRecords=10";
         }
 
         protected String ddlOp() {
