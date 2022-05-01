@@ -116,3 +116,6 @@
 2022-05-01 12:30:41,430 [od.console.org]] INFO  ConsumerCoordinator            - [Consumer clientId=consumer-2021-1231-1035-orgs-prod-1, groupId=2021-1231-1035-orgs-prod] Setting offset for partition mysql-prod.console.org-2 to the committed offset FetchPosition{offset=51812, offsetEpoch=Optional.empty, currentLeader=LeaderAndEpoch{leader=Optional[10.138.16.188:9092 (id: 188 rack: null)], epoch=0}}
 2022-05-01 12:30:41,451 [od.console.org]] INFO  ConsumerCoordinator            - [Consumer clientId=consumer-2021-1231-1035-orgs-prod-1, groupId=2021-1231-1035-orgs-prod] Setting offset for partition mysql-prod.console.org-1 to the committed offset FetchPosition{offset=49349, offsetEpoch=Optional[2], currentLeader=LeaderAndEpoch{leader=Optional.empty, epoch=2}}
 2022-05-01 12:30:41,451 [od.console.org]] INFO  ConsumerCoordinator            - [Consumer clientId=consumer-2021-1231-1035-orgs-prod-1, groupId=2021-1231-1035-orgs-prod] Setting offset for partition mysql-prod.console.org-0 to the committed offset FetchPosition{offset=51371, offsetEpoch=Optional.empty, currentLeader=LeaderAndEpoch{leader=Optional[10.138.16.190:9092 (id: 190 rack: null)], epoch=0}}
+
+# 最后一次提交(2022-02-24 14:57:39)
+[2021-1231-1035-orgs-prod,mysql-prod.console.org,1]::OffsetAndMetadata(offset=49349, leaderEpoch=Optional[2], metadata=, commitTimestamp=1645685859389, expireTimestamp=None)
