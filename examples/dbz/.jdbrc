@@ -47,7 +47,10 @@ use /home/qstesiro/github.com/qstesiro/camel/camel-examples/examples/dbz/src/mai
 # stop at org.apache.camel.component.kafka.KafkaConsumer:93
 # stop at org.apache.camel.component.kafka.KafkaFetchRecords:82
 # stop at org.apache.camel.component.kafka.KafkaFetchRecords:161
-stop at org.apache.camel.component.kafka.KafkaFetchRecords:170
+# stop at org.apache.camel.component.kafka.KafkaFetchRecords:170
+# stop at org.apache.camel.component.kafka.KafkaFetchRecords:316
+# stop at org.apache.camel.component.kafka.KafkaFetchRecords:322
+stop at org.apache.camel.component.kafka.KafkaFetchRecords:333
 # stop at org.apache.camel.component.kafka.DefaultKafkaClientFactory:34
 
 # 嵌套内部类设置断点需要类路径中包含内部类名

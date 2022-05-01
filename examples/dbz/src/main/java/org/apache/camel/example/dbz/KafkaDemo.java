@@ -138,18 +138,22 @@ public final class KafkaDemo {
         }
 
         protected String uri() {
-            // return "kafka:demo-43585133.inventory.customers"
-            //     + "?brokers=localhost:9092"
-            //     + "&groupId=2021-1231-1035-orgs-prod"
-            //     + "&autoOffsetReset=earliest";
             return "kafka:mysql-prod.console.org"
                 + "?brokers=10.138.16.188:9092"
-                + "&groupId=hmm-demo"
+                + "&groupId=2021-1231-1035-orgs-prod"
                 + "&autoOffsetReset=earliest"
-                + "&sessionTimeoutMs=100000"
-                + "&heartbeatIntervalMs=30000"
+                + "&sessionTimeoutMs=10000"
+                + "&heartbeatIntervalMs=3000"
                 + "&pollTimeoutMs=1000"
-                + "&maxPollRecords=10";
+                + "&maxPollRecords=1";
+            // return "kafka:mysql-prod.console.org"
+            //     + "?brokers=10.138.16.188:9092"
+            //     + "&groupId=hmm-demo"
+            //     + "&autoOffsetReset=earliest"
+            //     + "&sessionTimeoutMs=10000"
+            //     + "&heartbeatIntervalMs=3000"
+            //     + "&pollTimeoutMs=1000"
+            //     + "&maxPollRecords=1";
         }
 
         protected String ddlOp() {
